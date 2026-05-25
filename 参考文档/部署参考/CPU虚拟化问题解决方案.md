@@ -41,6 +41,41 @@ grep -E "(vmx|svm)" /proc/cpuinfo
 
 - Del / F2 / F10 / F12（开机时按对应按键）
 
+### 2.3 VMware 虚拟机设置
+
+如果在 VMware 虚拟机中运行 Android 模拟器，需要确保虚拟机配置已启用 CPU 虚拟化：
+
+**步骤：**
+
+1. **关闭虚拟机**（必须先关机才能修改设置）
+
+2. **打开虚拟机设置**：
+   - 在 VMware Workstation/Fusion 中选中虚拟机
+   - 点击 `编辑虚拟机设置`（Edit Virtual Machine Settings）
+
+3. **配置处理器**：
+   - 切换到 `处理器`（Processors）选项卡
+   - 勾选以下选项：
+     - ✅ `虚拟化 Intel VT-x/EPT 或 AMD-V/RVI`（Virtualize Intel VT-x/EPT or AMD-V/RVI）
+     - ✅ `虚拟化 CPU 性能计数器`（Virtualize CPU Performance Counters）
+
+4. **配置内存**：
+   - 切换到 `内存`（Memory）选项卡
+   - 建议分配至少 **4GB** 内存给虚拟机
+   - 如果需要运行多个模拟器，建议分配 **8GB** 或更多
+
+5. **配置网络**（可选）：
+   - 切换到 `网络适配器`（Network Adapter）选项卡
+   - 选择 `桥接模式`（Bridged）或 `NAT` 模式
+
+6. **保存设置并启动虚拟机**
+
+**重要提示：**
+
+- 必须先在宿主机 BIOS 中启用虚拟化技术，VMware 的虚拟化选项才能生效
+- 如果宿主机 BIOS 中未启用 VT-x/AMD-V，VMware 的虚拟化选项可能会灰显或不可用
+- 建议在 VMware 中安装 VMware Tools 以获得更好的性能和兼容性
+
 ## 三、Windows 系统问题解决
 
 ### 3.1 禁用 Hyper-V
