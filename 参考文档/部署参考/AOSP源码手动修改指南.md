@@ -658,86 +658,30 @@ permission_monitor                    u:object_r:permission_monitor_service:s0
 
 ### 6.3 同步到 prebuilts
 
-#### 6.3.1 为什么需要同步
+除了修改：
+- `system/sepolicy/private/service.te`
+- `system/sepolicy/private/service_contexts`
 
-AOSP 中的 SELinux 策略文件需要同时存在于两个位置：
-- `system/sepolicy/private/` - 开发态源码目录
-- `system/sepolicy/prebuilts/api/<version>/private/` - API 基线预构建目录
+还需要在 **不同目录下的同名文件** 中做相同修改：
+- `system/sepolicy/prebuilts/api/29.0/private/service.te`
+- `system/sepolicy/prebuilts/api/29.0/private/service_contexts`
 
-这是因为：
-1. **向后兼容性**：prebuilts 目录包含不同 API 版本的策略基线
-2. **编译依赖**：某些模块编译时依赖 prebuilts 中的策略文件
-3. **OTA 更新**：SELinux 策略的 prebuilts 用于生成 OTA 更新包
+也就是说，这里不是复制文件，而是像上面一样，分别打开这两个文件，手动补上同样的内容。
 
-#### 6.3.2 同步操作步骤
+#### 6.3.1 修改 `system/sepolicy/prebuilts/api/29.0/private/service.te`
 
-**步骤 1：确认 API 版本**
+添加以下内容：
 
-首先确定当前编译目标的 API 版本：
-
-```bash
-# 查看当前 target 的 API 级别
-getprop ro.build.version.sdk
-
-# 或者从 build 配置中查看
-cat build/make/core/version_defaults.mk | grep PLATFORM_SDK_VERSION
+```te
+type permission_monitor_service, system_api_service, service_manager_type;
 ```
 
-对于 Android 10 (Q)，API 级别通常是 **29**。
+#### 6.3.2 修改 `system/sepolicy/prebuilts/api/29.0/private/service_contexts`
 
-**步骤 2：同步 service.te**
+添加以下内容：
 
-```bash
-# 复制策略类型定义
-cp system/sepolicy/private/service.te \
-    system/sepolicy/prebuilts/api/29.0/private/service.te
 ```
-
-**步骤 3：同步 service_contexts**
-
-```bash
-# 复制服务上下文映射
-cp system/sepolicy/private/service_contexts \
-    system/sepolicy/prebuilts/api/29.0/private/service_contexts
-```
-
-#### 6.3.3 验证同步结果
-
-```bash
-# 验证文件内容一致
-diff system/sepolicy/private/service.te \
-    system/sepolicy/prebuilts/api/29.0/private/service.te
-
-diff system/sepolicy/private/service_contexts \
-    system/sepolicy/prebuilts/api/29.0/private/service_contexts
-
-# 如果输出为空，表示文件内容一致
-```
-
-#### 6.3.4 注意事项
-
-| 注意事项 | 说明 |
-|----------|------|
-| **API 版本匹配** | 确保同步到正确的 API 版本目录（如 29.0、30.0 等） |
-| **完整复制** | 必须复制整个文件，而不仅仅是新增内容 |
-| **版本升级** | 如果同时支持多个 API 版本，需要同步到所有相关目录 |
-| **冲突处理** | 如果 prebuilts 中的文件被其他修改占用，需要手动合并 |
-
-#### 6.3.5 多版本同步（可选）
-
-如果需要支持多个 API 版本，可以使用循环批量同步：
-
-```bash
-# 同步到所有支持的 API 版本
-for api_version in 29.0 30.0 31.0; do
-    if [ -d "system/sepolicy/prebuilts/api/${api_version}/private/" ]; then
-        cp system/sepolicy/private/service.te \
-            system/sepolicy/prebuilts/api/${api_version}/private/service.te
-        cp system/sepolicy/private/service_contexts \
-            system/sepolicy/prebuilts/api/${api_version}/private/service_contexts
-        echo "Synced to API ${api_version}"
-    fi
-done
+permission_monitor                    u:object_r:permission_monitor_service:s0
 ```
 
 ---
